@@ -1,58 +1,90 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
-    <p>
-      For a guide and recipes on how to configure / customize this project,<br>
-      check out the
-      <a href="https://cli.vuejs.org" target="_blank" rel="noopener">vue-cli documentation</a>.
-    </p>
-    <h3>Installed CLI Plugins</h3>
-    <ul>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-babel" target="_blank" rel="noopener">babel</a></li>
-      <li><a href="https://github.com/vuejs/vue-cli/tree/dev/packages/%40vue/cli-plugin-eslint" target="_blank" rel="noopener">eslint</a></li>
-    </ul>
-    <h3>Essential Links</h3>
-    <ul>
-      <li><a href="https://vuejs.org" target="_blank" rel="noopener">Core Docs</a></li>
-      <li><a href="https://forum.vuejs.org" target="_blank" rel="noopener">Forum</a></li>
-      <li><a href="https://chat.vuejs.org" target="_blank" rel="noopener">Community Chat</a></li>
-      <li><a href="https://twitter.com/vuejs" target="_blank" rel="noopener">Twitter</a></li>
-      <li><a href="https://news.vuejs.org" target="_blank" rel="noopener">News</a></li>
-    </ul>
-    <h3>Ecosystem</h3>
-    <ul>
-      <li><a href="https://router.vuejs.org" target="_blank" rel="noopener">vue-router</a></li>
-      <li><a href="https://vuex.vuejs.org" target="_blank" rel="noopener">vuex</a></li>
-      <li><a href="https://github.com/vuejs/vue-devtools#vue-devtools" target="_blank" rel="noopener">vue-devtools</a></li>
-      <li><a href="https://vue-loader.vuejs.org" target="_blank" rel="noopener">vue-loader</a></li>
-      <li><a href="https://github.com/vuejs/awesome-vue" target="_blank" rel="noopener">awesome-vue</a></li>
-    </ul>
+    <div class="content" v-for="(n, index) in pageOffSet" :key="index">
+      <img
+        :src="'https://atlas-content-cdn.pixelsquid.com/stock-images/armchair-arm-chair-6360XZ2-600.jpg'+index"
+        alt
+      />
+      <p>
+        Lorem ipsum dolor sit amet consectetur
+        adipisicing elit. Vel tempora esse placeat
+        sapiente accusamus quos dolorem quisquam quo
+        similique tempore laboriosam natus cupiditate
+        ipsa laudantium saepe fugiat, non necessitatibus maxime.
+      </p>
+    </div>
+    <footer>
+      <div ref="infiniteScrollTrigger" id="scroll-trigger"></div>
+      <div class="circle-loader" v-if="showloader"></div>
+    </footer>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
-  props: {
-    msg: String
+  data() {
+    return {
+      currentPage: 1,
+      maxPerPage: 2,
+      totalResults: 100,
+      showloader: true
+    };
+  },
+  computed: {
+    pageCount() {
+      return Math.ceil(this.totalResults / this.maxPerPage);
+    },
+    pageOffSet() {
+      // quero que ele traga de 2 em 2
+      return this.maxPerPage * this.currentPage;
+    } 
+  },
+  methods: {
+    scrollTrigger() {
+      const observer = new IntersectionObserver( entries => {
+        entries.forEach(entry => {
+          if(entry.intersectionRatio > 0 && this.currentPage < this.pageCount) {
+            this.showloader = true;
+            setTimeout(() => {
+              this.currentPage += 1;
+              this.showloader = false;
+            }, 2000); // simulando uma chamada ajax
+          }
+        });
+      })
+      observer.observe(this.$refs.infiniteScrollTrigger)
+    }
+  },
+  mounted() {
+    this.scrollTrigger();
   }
-}
+};
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h3 {
-  margin: 40px 0 0;
+#scroll-trigger {
+  height: 50px;
 }
-ul {
-  list-style-type: none;
-  padding: 0;
+
+.circle-loader {
+  position: relative;
+  bottom: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  border: 5px dashed #6769ab;
+  /* border-top: 4px solid rgb(50, 10, 73); */
+  animation: animate 1.5s infinite backwards;
+  -moz-animation: animate 1.5s infinite backwards;
 }
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+
+@keyframes animate {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 </style>
